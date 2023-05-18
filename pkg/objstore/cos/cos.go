@@ -78,7 +78,7 @@ func NewBucket(logger log.Logger, conf []byte, component string) (*Bucket, error
 		return nil, errors.Wrap(err, "create by Urlsuffix")
 	}
 
-	b, err := cos.NewBaseURL(bucketUrl.String())
+	b, err := cos.NewBaseURL(bucketURL.String())
 	if err != nil {
 		return nil, errors.Wrap(err, "initialize cos base url")
 	}
