@@ -15,10 +15,12 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/log"
+	"github.com/mozillazg/go-cos"
 	"github.com/pkg/errors"
 	"github.com/thanos-io/thanos/pkg/objstore"
 	"github.com/thanos-io/thanos/pkg/objstore/clientutil"
 	"github.com/thanos-io/thanos/pkg/runutil"
+	"gopkg.in/yaml.v2"
 )
 
 // DirDelim is the delimiter used to model a directory structure in an object store bucket.
@@ -71,17 +73,12 @@ func NewBucket(logger log.Logger, conf []byte, component string) (*Bucket, error
 		return nil, errors.Wrap(err, "validate cos configuration")
 	}
 	var bucketURL *url.URL
-	var err error
-	httpSchema := "http"
-	if config.Secure != nil && config.Secure == true {
-		httpSchema = "https"
-	}
-	bucketURL, err = url.Parse(fmt.Sprintf("%s://%s-%s.cos.%s.%s", httpSchema, config.Bucket, config.AppId, config.Region, config.Urlsuffix))
+	bucketURL, err = url.Parse(fmt.Sprintf("http://%s-%s.cos.%s.%s", config.Bucket, config.AppId, config.Region, config.Urlsuffix))
 	if err != nil {
 		return nil, errors.Wrap(err, "create by Urlsuffix")
 	}
 
-	b, err := cos.NewBaseURL(bucketUrl.String())
+	b, err := cos.NewBaseURL(bucketUrl.String(), config.ServicebaseURL)
 	if err != nil {
 		return nil, errors.Wrap(err, "initialize cos base url")
 	}
