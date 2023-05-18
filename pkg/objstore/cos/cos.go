@@ -34,11 +34,14 @@ type Bucket struct {
 
 // Config encapsulates the necessary config values to instantiate an cos client.
 type Config struct {
-	Bucket    string `yaml:"bucket"`
-	Region    string `yaml:"region"`
-	AppId     string `yaml:"app_id"`
-	SecretKey string `yaml:"secret_key"`
-	SecretId  string `yaml:"secret_id"`
+	Bucket         string `yaml:"bucket"`
+	Region         string `yaml:"region"`
+	AppId          string `yaml:"app_id"`
+	SecretKey      string `yaml:"secret_key"`
+	SecretId       string `yaml:"secret_id"`
+	Secure         bool   `yaml:"secure"`
+	Urlsuffix      string `yaml:"urlsuffix"`
+	ServicebaseURL string `yaml:"servicebaseurl"`
 }
 
 // Validate checks to see if mandatory cos config options are set.
@@ -47,6 +50,8 @@ func (conf *Config) validate() error {
 		conf.AppId == "" ||
 		conf.Region == "" ||
 		conf.SecretId == "" ||
+		conf.Urlsuffix == "" ||
+		conf.ServicebaseURL == "" ||
 		conf.SecretKey == "" {
 		return errors.New("insufficient cos configuration information")
 	}
@@ -67,9 +72,9 @@ func NewBucket(logger log.Logger, conf []byte, component string) (*Bucket, error
 		return nil, errors.Wrap(err, "validate cos configuration")
 	}
 
-	bucketUrl := cos.NewBucketURL(config.Bucket, config.AppId, config.Region, true)
+	bucketUrl := cos.NewBucketURL(config.Bucket, config.AppId, config.Region, config.Secure, config.Urlsuffix)
 
-	b, err := cos.NewBaseURL(bucketUrl.String())
+	b, err := cos.NewBaseURL(bucketUrl.String(), config.ServicebaseURL)
 	if err != nil {
 		return nil, errors.Wrap(err, "initialize cos base url")
 	}
